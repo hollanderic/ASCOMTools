@@ -33,6 +33,9 @@
             this.labelDriverId = new System.Windows.Forms.Label();
             this.Position = new System.Windows.Forms.Button();
             this.DebugOut = new System.Windows.Forms.ListBox();
+            this.SetPosition = new System.Windows.Forms.Button();
+            this.PositionBox = new System.Windows.Forms.NumericUpDown();
+            ((System.ComponentModel.ISupportInitialize)(this.PositionBox)).BeginInit();
             this.SuspendLayout();
             // 
             // buttonChoose
@@ -73,7 +76,7 @@
             // 
             this.Position.Location = new System.Drawing.Point(29, 111);
             this.Position.Name = "Position";
-            this.Position.Size = new System.Drawing.Size(75, 23);
+            this.Position.Size = new System.Drawing.Size(98, 23);
             this.Position.TabIndex = 3;
             this.Position.Text = "GetPosition";
             this.Position.UseVisualStyleBackColor = true;
@@ -88,11 +91,35 @@
             this.DebugOut.Size = new System.Drawing.Size(479, 164);
             this.DebugOut.TabIndex = 4;
             // 
+            // SetPosition
+            // 
+            this.SetPosition.Location = new System.Drawing.Point(248, 111);
+            this.SetPosition.Name = "SetPosition";
+            this.SetPosition.Size = new System.Drawing.Size(75, 23);
+            this.SetPosition.TabIndex = 5;
+            this.SetPosition.Text = "SetPosition";
+            this.SetPosition.UseVisualStyleBackColor = true;
+            this.SetPosition.Click += new System.EventHandler(this.SetPosition_Click);
+            // 
+            // PositionBox
+            // 
+            this.PositionBox.Location = new System.Drawing.Point(340, 111);
+            this.PositionBox.Maximum = new decimal(new int[] {
+            1000000,
+            0,
+            0,
+            0});
+            this.PositionBox.Name = "PositionBox";
+            this.PositionBox.Size = new System.Drawing.Size(120, 22);
+            this.PositionBox.TabIndex = 6;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(545, 322);
+            this.Controls.Add(this.PositionBox);
+            this.Controls.Add(this.SetPosition);
             this.Controls.Add(this.DebugOut);
             this.Controls.Add(this.Position);
             this.Controls.Add(this.labelDriverId);
@@ -102,6 +129,7 @@
             this.Name = "Form1";
             this.Text = "TEMPLATEDEVICETYPE Test";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
+            ((System.ComponentModel.ISupportInitialize)(this.PositionBox)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -113,6 +141,8 @@
         private System.Windows.Forms.Label labelDriverId;
         private System.Windows.Forms.Button Position;
         private System.Windows.Forms.ListBox DebugOut;
+        private System.Windows.Forms.Button SetPosition;
+        private System.Windows.Forms.NumericUpDown PositionBox;
     }
 }
 

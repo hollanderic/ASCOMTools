@@ -238,12 +238,16 @@ namespace ASCOM.phocuser
                     sPort.WriteTimeout = 1500;
 
                     sPort.Open();
+                    sPort.WriteLine(":init*");
                     
                     // TODO connect to the device
                 }
                 else
                 {
                     connectedState = false;
+                    sPort.WriteLine(":deinit*");
+                    while (sPort.BytesToWrite > 0) { }
+
                     sPort.Close();
                     LogMessage("Connected Set", "Disconnecting from port {0}", comPort);
                     // TODO disconnect from the device
@@ -309,7 +313,7 @@ namespace ASCOM.phocuser
         #region IFocuser Implementation
 
         private int focuserPosition = 0; // Class level variable to hold the current focuser position
-        private const int focuserSteps = 10000;
+        private const int focuserSteps = 1000000;
 
         public bool Absolute
         {
@@ -363,7 +367,7 @@ namespace ASCOM.phocuser
             get
             {
                 tl.LogMessage("MaxStep Get", focuserSteps.ToString());
-                return focuserSteps; // Maximum extent of the focuser, so position range is 0 to 10,000
+                return focuserSteps; // Maximum extent of the focuser
             }
         }
 
@@ -384,7 +388,7 @@ namespace ASCOM.phocuser
             {
                 sPort.WriteLine(":getpos*");
                 String instring;
-                instring = sPort.ReadLine();
+                instring =  sPort.ReadTo("*");
                 focuserPosition = Int32.Parse(instring);
                 return focuserPosition; // Return the focuser position
             }

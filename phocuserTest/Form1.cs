@@ -67,5 +67,17 @@ namespace ASCOM.phocuser
                 DebugOut.Items.Add("Focuser is NOT connected");
             }
         }
+
+        private void SetPosition_Click(object sender, EventArgs e)
+        {
+            if (IsConnected)
+            {
+                driver.Move(decimal.ToInt32(PositionBox.Value));
+                DebugOut.Items.Add("Focuser at position " + driver.Position.ToString());
+            } else
+            {
+                DebugOut.Items.Add("Focuser is NOT connected");
+            }
+        }
     }
 }
