@@ -31,6 +31,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.Ports;
 using System.Text;
+using System.Threading;
 using System.Runtime.InteropServices;
 
 using ASCOM;
@@ -106,7 +107,7 @@ namespace ASCOM.phocuser
         /// </summary>
         public Focuser()
         {
-            tl = new TraceLogger("", "phocuser");
+            tl = new TraceLogger("phocuser.txt", "phocuser");
             ReadProfile(); // Read device configuration from the ASCOM Profile store
 
             tl.LogMessage("Focuser", "Starting initialisation");
@@ -215,9 +216,9 @@ namespace ASCOM.phocuser
             }
             set
             {
-                tl.LogMessage("Connected", "Set {0}", value);
-                if (value == IsConnected)
-                    return;
+                LogMessage("Connected", "Set {0}", value);
+               // if (value == IsConnected)
+               //     return;
 
                 if (value)
                 {
@@ -238,19 +239,20 @@ namespace ASCOM.phocuser
                     sPort.WriteTimeout = 1500;
 
                     sPort.Open();
+                    Thread.Sleep(100);
                     sPort.WriteLine(":init*");
                     
                     // TODO connect to the device
                 }
                 else
                 {
-                    connectedState = false;
                     sPort.WriteLine(":deinit*");
                     while (sPort.BytesToWrite > 0) { }
-
+                    Thread.Sleep(100);
                     sPort.Close();
                     LogMessage("Connected Set", "Disconnecting from port {0}", comPort);
                     // TODO disconnect from the device
+                    connectedState = false;
                 }
             }
         }
@@ -387,7 +389,7 @@ namespace ASCOM.phocuser
             get
             {
                 sPort.WriteLine(":getpos*");
-                String instring;
+                String instring = "";
                 instring =  sPort.ReadTo("*");
                 focuserPosition = Int32.Parse(instring);
                 return focuserPosition; // Return the focuser position
