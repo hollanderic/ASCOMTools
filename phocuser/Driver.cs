@@ -239,7 +239,7 @@ namespace ASCOM.phocuser
                     sPort.WriteTimeout = 1500;
 
                     sPort.Open();
-                    Thread.Sleep(100);
+                    Thread.Sleep(2000);   //Based on testing, some Arduino can take up to 1.8sec before ready to respond to serial.
                     sPort.WriteLine(":init*");
                     
                     // TODO connect to the device
