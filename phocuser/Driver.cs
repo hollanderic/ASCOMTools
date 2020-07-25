@@ -107,7 +107,7 @@ namespace ASCOM.phocuser
         /// </summary>
         public Focuser()
         {
-            tl = new TraceLogger("phocuser.txt", "phocuser");
+            tl = new TraceLogger("", "phocuser");
             ReadProfile(); // Read device configuration from the ASCOM Profile store
 
             tl.LogMessage("Focuser", "Starting initialisation");
