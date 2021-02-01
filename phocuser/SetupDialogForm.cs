@@ -68,5 +68,9 @@ namespace ASCOM.phocuser
                 comboBoxComPort.SelectedItem = Focuser.comPort;
             }
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+        }
     }
 }

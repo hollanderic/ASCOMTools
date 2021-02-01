@@ -33,6 +33,7 @@ namespace ASCOM.phocuser
             this.label2 = new System.Windows.Forms.Label();
             this.chkTrace = new System.Windows.Forms.CheckBox();
             this.comboBoxComPort = new System.Windows.Forms.ComboBox();
+            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // cmdOK
@@ -40,7 +41,7 @@ namespace ASCOM.phocuser
             this.cmdOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdOK.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.cmdOK.Location = new System.Drawing.Point(375, 138);
-            this.cmdOK.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cmdOK.Margin = new System.Windows.Forms.Padding(4);
             this.cmdOK.Name = "cmdOK";
             this.cmdOK.Size = new System.Drawing.Size(79, 30);
             this.cmdOK.TabIndex = 0;
@@ -53,7 +54,7 @@ namespace ASCOM.phocuser
             this.cmdCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.cmdCancel.Location = new System.Drawing.Point(375, 175);
-            this.cmdCancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cmdCancel.Margin = new System.Windows.Forms.Padding(4);
             this.cmdCancel.Name = "cmdCancel";
             this.cmdCancel.Size = new System.Drawing.Size(79, 31);
             this.cmdCancel.TabIndex = 1;
@@ -75,7 +76,7 @@ namespace ASCOM.phocuser
             // 
             this.chkTrace.AutoSize = true;
             this.chkTrace.Location = new System.Drawing.Point(99, 53);
-            this.chkTrace.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.chkTrace.Margin = new System.Windows.Forms.Padding(4);
             this.chkTrace.Name = "chkTrace";
             this.chkTrace.Size = new System.Drawing.Size(87, 21);
             this.chkTrace.TabIndex = 6;
@@ -86,23 +87,34 @@ namespace ASCOM.phocuser
             // 
             this.comboBoxComPort.FormattingEnabled = true;
             this.comboBoxComPort.Location = new System.Drawing.Point(99, 15);
-            this.comboBoxComPort.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.comboBoxComPort.Margin = new System.Windows.Forms.Padding(4);
             this.comboBoxComPort.Name = "comboBoxComPort";
             this.comboBoxComPort.Size = new System.Drawing.Size(119, 24);
             this.comboBoxComPort.TabIndex = 7;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(32, 115);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 8;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // SetupDialogForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(467, 215);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.comboBoxComPort);
             this.Controls.Add(this.chkTrace);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.cmdCancel);
             this.Controls.Add(this.cmdOK);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "SetupDialogForm";
@@ -121,5 +133,6 @@ namespace ASCOM.phocuser
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.CheckBox chkTrace;
         private System.Windows.Forms.ComboBox comboBoxComPort;
+        private System.Windows.Forms.Button button1;
     }
 }

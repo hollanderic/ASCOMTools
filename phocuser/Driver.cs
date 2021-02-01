@@ -112,7 +112,7 @@ namespace ASCOM.phocuser
 
             tl.LogMessage("Focuser", "Starting initialisation");
 
-            connectedState = false; // Initialise connected to false
+            //connectedState = false; // Initialise connected to false
             utilities = new Util(); //Initialise util object
             astroUtilities = new AstroUtils(); // Initialise astro-utilities object
             //TODO: Implement your additional construction here
@@ -222,26 +222,32 @@ namespace ASCOM.phocuser
 
                 if (value)
                 {
+                    if (sPort == null)
+                    {
+                        sPort = new SerialPort();
+                    }
+                    if (!sPort.IsOpen)
+                    {
+                        LogMessage("Connected Set", "Connecting to port {0}", comPort);
+                        //sPort = new SerialPort();
+
+                        // Allow the user to set the appropriate properties.
+                        sPort.PortName = comPort;
+                        sPort.BaudRate = 9600;
+                        sPort.Parity = Parity.None;
+                        sPort.DataBits = 8;
+                        sPort.StopBits = StopBits.One;
+                        sPort.Handshake = Handshake.None;
+
+                        // Set the read/write timeouts
+                        sPort.ReadTimeout = 1500;
+                        sPort.WriteTimeout = 1500;
+
+                        sPort.Open();
+                        Thread.Sleep(2000);   //Based on testing, some Arduino can take up to 1.8sec before ready to respond to serial.
+                        sPort.WriteLine(":init*");
+                    }
                     connectedState = true;
-                    LogMessage("Connected Set", "Connecting to port {0}", comPort);
-                    sPort = new SerialPort();
-
-                    // Allow the user to set the appropriate properties.
-                    sPort.PortName = comPort;
-                    sPort.BaudRate = 9600;
-                    sPort.Parity = Parity.None;
-                    sPort.DataBits = 8;
-                    sPort.StopBits = StopBits.One;
-                    sPort.Handshake = Handshake.None;
-
-                    // Set the read/write timeouts
-                    sPort.ReadTimeout = 1500;
-                    sPort.WriteTimeout = 1500;
-
-                    sPort.Open();
-                    Thread.Sleep(2000);   //Based on testing, some Arduino can take up to 1.8sec before ready to respond to serial.
-                    sPort.WriteLine(":init*");
-                    
                     // TODO connect to the device
                 }
                 else
@@ -255,6 +261,11 @@ namespace ASCOM.phocuser
                     connectedState = false;
                 }
             }
+        }
+        private void send_sPort(string outstr)
+        {
+            sPort.WriteLine(outstr);
+            while (sPort.BytesToWrite > 0) { }
         }
 
         public string Description
@@ -336,8 +347,13 @@ namespace ASCOM.phocuser
         {
             get
             {
-                tl.LogMessage("IsMoving Get", false.ToString());
-                return false; // This focuser always moves instantaneously so no need for IsMoving ever to be True
+                send_sPort(":ismoving*");
+                String instring = "";
+                instring = sPort.ReadTo("*");
+                bool temp = (Int32.Parse(instring) == 1);
+                
+                tl.LogMessage("IsMoving Get", temp.ToString() +"  "+ instring);
+                return temp; // This focuser always moves instantaneously so no need for IsMoving ever to be True
             }
         }
 
@@ -380,7 +396,7 @@ namespace ASCOM.phocuser
             {
                 Position = focuserSteps;
             }
-            sPort.WriteLine(":setpos," + Position.ToString() + "*");
+            send_sPort(":setpos," + Position.ToString() + "*");
             focuserPosition = Position; // Set the focuser position
         }
 
@@ -388,10 +404,11 @@ namespace ASCOM.phocuser
         {
             get
             {
-                sPort.WriteLine(":getpos*");
+                send_sPort(":getpos*");
                 String instring = "";
                 instring =  sPort.ReadTo("*");
                 focuserPosition = Int32.Parse(instring);
+                tl.LogMessage("Position Get", focuserPosition.ToString());
                 return focuserPosition; // Return the focuser position
             }
         }
@@ -400,7 +417,7 @@ namespace ASCOM.phocuser
         {
             get
             {
-                tl.LogMessage("StepSize Get", "Not implemented");
+                tl.LogMessage("StepuuuSize Get", "Not implemented");
                 throw new ASCOM.PropertyNotImplementedException("StepSize", false);
             }
         }
