@@ -41,6 +41,7 @@ using ASCOM.Utilities;
 using ASCOM.DeviceInterface;
 using System.Globalization;
 using System.Collections;
+using System.Timers;
 
 namespace ASCOM.phocuser
 {
@@ -79,6 +80,7 @@ namespace ASCOM.phocuser
         internal static string traceStateDefault = "false";
         internal static SerialPort sPort;
         private static System.Threading.Mutex sPortLock = new Mutex();
+        private static System.Timers.Timer statTimer;
 
         internal static string comPort; // Variables to hold the current device configuration
 
@@ -209,25 +211,27 @@ namespace ASCOM.phocuser
         }
         public int SendCommand(String command, int val =  -1)
         {
-            tl.LogMessage("SendCommand", "waiting");
+            String retstr = "";
             sPortLock.WaitOne();
-            tl.LogMessage("SendCommand", "acquired mutex");
-            if (val >= 0)
+            try
             {
-                sPort.WriteLine(":" + command + "," + val.ToString() + "*");
-            }
+                if (val >= 0)
+                {
+                    sPort.WriteLine(":" + command + "," + val.ToString() + "*");
+                }
 
-            else
-            {
-                sPort.WriteLine(":" + command + "*");
+                else
+                {
+                    sPort.WriteLine(":" + command + "*");
+                }
+                while (sPort.BytesToWrite > 0) { }
+                retstr = sPort.ReadTo("*");
             }
-            LogMessage("SendCommand", "waiting " +command + val.ToString());
-            while (sPort.BytesToWrite > 0) { }
-            LogMessage("SendCommand", "wrote bytes");
-            String retstr = sPort.ReadTo("*");
-            LogMessage("SendCommand", "got " + retstr);
+            catch (Exception e)
+            {
+                LogMessage("SendCommand exception", e.ToString());
+            }
             sPortLock.ReleaseMutex();
-            LogMessage("SendCommand", "Mutex Released");
             return Int32.Parse(retstr);
         }
 
@@ -270,7 +274,6 @@ namespace ASCOM.phocuser
                         sPort.Open();
                         Thread.Sleep(2000);   //Based on testing, some Arduino can take up to 1.8sec before ready to respond to serial.
                         SendCommand("init");
-                        //sPort.WriteLine(":init*");
                     }
                     connectedState = true;
                     // TODO connect to the device
@@ -286,7 +289,6 @@ namespace ASCOM.phocuser
                 }
             }
         }
-
 
         public string Description
         {
@@ -360,14 +362,13 @@ namespace ASCOM.phocuser
         public void Halt()
         {
             tl.LogMessage("Halt", "Not implemented");
-            throw new ASCOM.MethodNotImplementedException("Halt");
+            SendCommand("stop");
         }
 
         public bool IsMoving
         {
             get
             {
-                tl.LogMessage("IsMoving", "Sending request");
                 int retval = SendCommand("ismoving");
                 bool temp = (retval == 1);
                 tl.LogMessage("IsMoving Get", temp.ToString());
@@ -409,22 +410,19 @@ namespace ASCOM.phocuser
 
         public void Move(int Pos)
         {
-            tl.LogMessage("Move", Pos.ToString());
             if (Pos > focuserSteps)
             {
                 Pos = focuserSteps;
             }
             SendCommand("setpos", Pos);
-            tl.LogMessage("Move", "Move complete");
-            focuserPosition = Pos; // Set the focuser position
+            tl.LogMessage("Move", Pos.ToString());
         }
 
         public int Position
         {
             get
             {
-                tl.LogMessage("Position", "Getting position");
-                focuserPosition = 100;// SendCommand("getpos");
+                focuserPosition =  SendCommand("getpos");
                 tl.LogMessage("Position", "Got position " + focuserPosition.ToString());
                 return focuserPosition; // Return the focuser position
             }
