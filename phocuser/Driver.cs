@@ -78,6 +78,7 @@ namespace ASCOM.phocuser
         internal static string traceStateProfileName = "Trace Level";
         internal static string traceStateDefault = "false";
         internal static SerialPort sPort;
+        private static System.Threading.Mutex sPortLock = new Mutex();
 
         internal static string comPort; // Variables to hold the current device configuration
 
@@ -206,17 +207,39 @@ namespace ASCOM.phocuser
             astroUtilities.Dispose();
             astroUtilities = null;
         }
+        public int SendCommand(String command, int val =  -1)
+        {
+            tl.LogMessage("SendCommand", "waiting");
+            sPortLock.WaitOne();
+            tl.LogMessage("SendCommand", "acquired mutex");
+            if (val >= 0)
+            {
+                sPort.WriteLine(":" + command + "," + val.ToString() + "*");
+            }
+            else
+            {
+                sPort.WriteLine(":" + command + "*");
+            }
+            LogMessage("SendCommand", "waiting " +command + val.ToString());
+            while (sPort.BytesToWrite > 0) { }
+            LogMessage("SendCommand", "wrote bytes");
+            String retstr = sPort.ReadTo("*");
+            LogMessage("SendCommand", "got " + retstr);
+            sPortLock.ReleaseMutex();
+            LogMessage("SendCommand", "Mutex Released");
+            return Int32.Parse(retstr);
+        }
 
         public bool Connected
         {
             get
             {
-                LogMessage("Connected", "Get {0}", IsConnected);
+                //LogMessage("Connected", "Get {0}", IsConnected);
                 return IsConnected;
             }
             set
             {
-                LogMessage("Connected", "Set {0}", value);
+                //LogMessage("Connected", "Set {0}", value);
                // if (value == IsConnected)
                //     return;
 
@@ -245,15 +268,15 @@ namespace ASCOM.phocuser
 
                         sPort.Open();
                         Thread.Sleep(2000);   //Based on testing, some Arduino can take up to 1.8sec before ready to respond to serial.
-                        sPort.WriteLine(":init*");
+                        SendCommand("init");
+                        //sPort.WriteLine(":init*");
                     }
                     connectedState = true;
                     // TODO connect to the device
                 }
                 else
                 {
-                    sPort.WriteLine(":deinit*");
-                    while (sPort.BytesToWrite > 0) { }
+                    SendCommand("deinit");
                     Thread.Sleep(100);
                     sPort.Close();
                     LogMessage("Connected Set", "Disconnecting from port {0}", comPort);
@@ -262,11 +285,7 @@ namespace ASCOM.phocuser
                 }
             }
         }
-        private void send_sPort(string outstr)
-        {
-            sPort.WriteLine(outstr);
-            while (sPort.BytesToWrite > 0) { }
-        }
+
 
         public string Description
         {
@@ -347,12 +366,10 @@ namespace ASCOM.phocuser
         {
             get
             {
-                send_sPort(":ismoving*");
-                String instring = "";
-                instring = sPort.ReadTo("*");
-                bool temp = (Int32.Parse(instring) == 1);
-                
-                tl.LogMessage("IsMoving Get", temp.ToString() +"  "+ instring);
+                tl.LogMessage("IsMoving", "Sending request");
+                int retval = SendCommand("ismoving");
+                bool temp = (retval == 1);
+                tl.LogMessage("IsMoving Get", temp.ToString());
                 return temp; // This focuser always moves instantaneously so no need for IsMoving ever to be True
             }
         }
@@ -361,12 +378,12 @@ namespace ASCOM.phocuser
         {
             get
             {
-                tl.LogMessage("Link Get", this.Connected.ToString());
+                //tl.LogMessage("Link Get", this.Connected.ToString());
                 return this.Connected; // Direct function to the connected method, the Link method is just here for backwards compatibility
             }
             set
             {
-                tl.LogMessage("Link Set", value.ToString());
+                //tl.LogMessage("Link Set", value.ToString());
                 this.Connected = value; // Direct function to the connected method, the Link method is just here for backwards compatibility
             }
         }
@@ -389,26 +406,25 @@ namespace ASCOM.phocuser
             }
         }
 
-        public void Move(int Position)
+        public void Move(int Pos)
         {
-            tl.LogMessage("Move", Position.ToString());
-            if (Position > focuserSteps)
+            tl.LogMessage("Move", Pos.ToString());
+            if (Pos > focuserSteps)
             {
-                Position = focuserSteps;
+                Pos = focuserSteps;
             }
-            send_sPort(":setpos," + Position.ToString() + "*");
-            focuserPosition = Position; // Set the focuser position
+            SendCommand("setpos", Pos);
+            tl.LogMessage("Move", "Move complete");
+            focuserPosition = Pos; // Set the focuser position
         }
 
         public int Position
         {
             get
             {
-                send_sPort(":getpos*");
-                String instring = "";
-                instring =  sPort.ReadTo("*");
-                focuserPosition = Int32.Parse(instring);
-                tl.LogMessage("Position Get", focuserPosition.ToString());
+                tl.LogMessage("Position", "Getting position");
+                focuserPosition = 100;// SendCommand("getpos");
+                tl.LogMessage("Position", "Got position " + focuserPosition.ToString());
                 return focuserPosition; // Return the focuser position
             }
         }
