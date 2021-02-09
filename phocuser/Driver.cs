@@ -216,6 +216,7 @@ namespace ASCOM.phocuser
             {
                 sPort.WriteLine(":" + command + "," + val.ToString() + "*");
             }
+
             else
             {
                 sPort.WriteLine(":" + command + "*");
