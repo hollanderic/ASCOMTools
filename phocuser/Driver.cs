@@ -68,7 +68,6 @@ namespace ASCOM.phocuser
         /// The DeviceID is used by ASCOM applications to load the driver at runtime.
         /// </summary>
         internal static string driverID = "ASCOM.phocuser.Focuser";
-        // TODO Change the descriptive string for your driver then remove this line
         /// <summary>
         /// Driver description that displays in the ASCOM Chooser.
         /// </summary>
@@ -239,15 +238,10 @@ namespace ASCOM.phocuser
         {
             get
             {
-                //LogMessage("Connected", "Get {0}", IsConnected);
                 return IsConnected;
             }
             set
             {
-                //LogMessage("Connected", "Set {0}", value);
-               // if (value == IsConnected)
-               //     return;
-
                 if (value)
                 {
                     if (sPort == null)
@@ -257,9 +251,7 @@ namespace ASCOM.phocuser
                     if (!sPort.IsOpen)
                     {
                         LogMessage("Connected Set", "Connecting to port {0}", comPort);
-                        //sPort = new SerialPort();
 
-                        // Allow the user to set the appropriate properties.
                         sPort.PortName = comPort;
                         sPort.BaudRate = 9600;
                         sPort.Parity = Parity.None;
@@ -273,10 +265,10 @@ namespace ASCOM.phocuser
 
                         sPort.Open();
                         Thread.Sleep(2000);   //Based on testing, some Arduino can take up to 1.8sec before ready to respond to serial.
+                        // Init the controller, motor will be active once init is called.
                         SendCommand("init");
                     }
                     connectedState = true;
-                    // TODO connect to the device
                 }
                 else
                 {
@@ -284,7 +276,6 @@ namespace ASCOM.phocuser
                     Thread.Sleep(100);
                     sPort.Close();
                     LogMessage("Connected Set", "Disconnecting from port {0}", comPort);
-                    // TODO disconnect from the device
                     connectedState = false;
                 }
             }
@@ -292,7 +283,6 @@ namespace ASCOM.phocuser
 
         public string Description
         {
-            // TODO customise this device description
             get
             {
                 tl.LogMessage("Description Get", driverDescription);
@@ -305,8 +295,7 @@ namespace ASCOM.phocuser
             get
             {
                 Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-                // TODO customise this driver description
-                string driverInfo = "Information about the driver itself. Version: " + String.Format(CultureInfo.InvariantCulture, "{0}.{1}", version.Major, version.Minor);
+                string driverInfo = "Version: " + String.Format(CultureInfo.InvariantCulture, "{0}.{1}", version.Major, version.Minor);
                 tl.LogMessage("DriverInfo Get", driverInfo);
                 return driverInfo;
             }
@@ -348,6 +337,8 @@ namespace ASCOM.phocuser
         #region IFocuser Implementation
 
         private int focuserPosition = 0; // Class level variable to hold the current focuser position
+        // TODO: eventually will modify firmware where the counts are in units of microns, when that is finished this should
+        //       be fetched at startup and will be tuned to the specific scope configuration.
         private const int focuserSteps = 1000000;
 
         public bool Absolute
@@ -361,7 +352,7 @@ namespace ASCOM.phocuser
 
         public void Halt()
         {
-            tl.LogMessage("Halt", "Not implemented");
+            tl.LogMessage("Halt", "Stopping motion");
             SendCommand("stop");
         }
 
@@ -372,7 +363,7 @@ namespace ASCOM.phocuser
                 int retval = SendCommand("ismoving");
                 bool temp = (retval == 1);
                 tl.LogMessage("IsMoving Get", temp.ToString());
-                return temp; // This focuser always moves instantaneously so no need for IsMoving ever to be True
+                return temp;
             }
         }
 
@@ -380,12 +371,10 @@ namespace ASCOM.phocuser
         {
             get
             {
-                //tl.LogMessage("Link Get", this.Connected.ToString());
                 return this.Connected; // Direct function to the connected method, the Link method is just here for backwards compatibility
             }
             set
             {
-                //tl.LogMessage("Link Set", value.ToString());
                 this.Connected = value; // Direct function to the connected method, the Link method is just here for backwards compatibility
             }
         }
@@ -423,7 +412,6 @@ namespace ASCOM.phocuser
             get
             {
                 focuserPosition =  SendCommand("getpos");
-                tl.LogMessage("Position", "Got position " + focuserPosition.ToString());
                 return focuserPosition; // Return the focuser position
             }
         }
@@ -432,8 +420,10 @@ namespace ASCOM.phocuser
         {
             get
             {
-                tl.LogMessage("StepuuuSize Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("StepSize", false);
+                //TODO - should fetch this from focuser at init.  Not sure what software will use it.
+                //       If we switch to microns as the step unit this will be irrelevant.
+                tl.LogMessage("StepSize Get", "");
+                return 6.94;
             }
         }
 
