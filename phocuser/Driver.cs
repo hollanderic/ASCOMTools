@@ -102,7 +102,7 @@ namespace ASCOM.phocuser
         /// Variable to hold the trace logger object (creates a diagnostic log file with information that you specify)
         /// </summary>
         internal TraceLogger tl;
-
+        internal MonitorForm mf;
         /// <summary>
         /// Initializes a new instance of the <see cref="phocuser"/> class.
         /// Must be public for COM registration.
@@ -140,14 +140,25 @@ namespace ASCOM.phocuser
             // consider only showing the setup dialog if not connected
             // or call a different dialog if connected
             if (IsConnected)
-                System.Windows.Forms.MessageBox.Show("Already connected, just press OK");
-
-            using (SetupDialogForm F = new SetupDialogForm(tl))
             {
-                var result = F.ShowDialog();
-                if (result == System.Windows.Forms.DialogResult.OK)
+                if (mf == null)
                 {
-                    WriteProfile(); // Persist device configuration values to the ASCOM Profile store
+                    mf = new MonitorForm(this);
+                }
+                mf.Show();
+            }
+            else
+            {
+        
+                //System.Windows.Forms.MessageBox.Show("Already connected, just press OK");
+
+                using (SetupDialogForm F = new SetupDialogForm(tl))
+                {
+                    var result = F.ShowDialog();
+                    if (result == System.Windows.Forms.DialogResult.OK)
+                    {
+                        WriteProfile(); // Persist device configuration values to the ASCOM Profile store
+                    }
                 }
             }
         }
